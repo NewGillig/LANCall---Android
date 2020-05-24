@@ -1,0 +1,71 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:orientation="vertical">
+    <!--P2P Entrance-->
+    <LinearLayout
+        android:id="@+id/begin_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        android:background="#FFFFFF"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginTop="20dp"
+                android:textColor="#000000"
+                android:textSize="18sp"
+                android:text="P2P Call"/>
+            <TextView
+                android:id="@+id/local_ip_addr"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginTop="10dp"
+                android:textColor="#000000"
+                android:text="Your IP: 127.0.0.1"/>
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/ip_prompt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginBottom="50dp"
+                android:textColor="#000000"
+                android:text=""/>
+            <EditText
+                android:id="@+id/user_input_TargetIp"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:maxLines="1"
+                android:textAlignment="center"
+                android:layout_gravity="center"
+                android:text=""
+                android:hint="Enter peer's IP"
+                />
+
+            <Button
+                android:layout_marginTop="50dp"
+                android:id="@+id/user_input_phoneCall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Call" />
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>

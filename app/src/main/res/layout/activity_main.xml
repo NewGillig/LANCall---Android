@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:paddingBottom="16dp"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:paddingTop="16dp"
+    android:gravity="center_vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+   <!-- <TextView
+        android:id="@+id/connected_ip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="10dp"
+        android:textColor="#000000"
+        android:text="Connected by:"/>-->
+    <Button
+        android:id="@+id/phoneCall"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="P2P Call"
+        android:layout_gravity="center_vertical"
+        android:textAllCaps="false"
+        />
+<!--    <Button
+        android:id="@+id/phoneCall2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="P2P Call2"
+        android:layout_gravity="center_vertical"
+        android:textAllCaps="false"
+        />-->
+    <Button
+        android:id="@+id/Multi_phoneCall"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Group Call"
+        android:layout_gravity="center_vertical"
+        android:textAllCaps="false"/>
+    </LinearLayout>
+</LinearLayout>
