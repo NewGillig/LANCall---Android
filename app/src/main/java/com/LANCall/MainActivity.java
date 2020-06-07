@@ -22,6 +22,7 @@ import com.LANCall.Audio.AudioPlayerRunnable;
 import com.LANCall.Audio.AudioRecorder;
 import com.LANCall.Audio.AudioRecorderFactory;
 import com.LANCall.Audio.AudioRecorderRunnable;
+import com.LANCall.Cipher.AESCipher;
 import com.LANCall.Network.ClientFactory;
 import com.LANCall.Network.ClientRunnable;
 import com.LANCall.Network.ServerFactory;
@@ -71,9 +72,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
 
         super.onCreate(savadInstanceState);
+/*        File keyFilex = null;
+        keyFilex = new File(getFilesDir(),"key.ini");
+        String keyHex;
+        FileInputStream keyFileInput;
+        AESCipher aesCipher = null;
+        try{
+            keyFileInput = new FileInputStream(keyFilex);
+            byte[] keyHexByte = new byte[64];
+            keyFileInput.read(keyHexByte,0,64);
+            keyHex = new String(keyHexByte,"UTF-8");
+            aesCipher = new AESCipher(keyHex);
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        String msg = "awoif987875alsdfjoawiuefjlaksjfdlkajsdfl;k;jasd;lkf;";
+        byte[] msgx = msg.getBytes();
+        byte[] msgxx = new byte[104];
+        System.arraycopy(msgx,0,msgxx,0,52);
+        System.arraycopy(msgx,0,msgxx,52,52);
+        byte[] xxx = aesCipher.encrypt(msgx);
+        byte[] xxxx = aesCipher.encrypt(msgxx);
+        byte[] xxx2 = new byte[104];
+        System.arraycopy(xxx,0,xxx2,0,52);
+        System.arraycopy(xxxx,0,xxx2,52,52);
+        byte[] msgx2 = aesCipher.decrypt(xxx2);*/
+
         checkPermission();
-        setContentView(R.layout.activity_main);
-        findViewById(R.id.phoneCall).setOnClickListener(this);
+        File keyFile = null;
+        try {
+            keyFile = new File(getFilesDir(),"key.ini");
+            if(keyFile.exists()) {
+                setContentView(R.layout.activity_main);
+                findViewById(R.id.phoneCall).setOnClickListener(this);
+                findViewById(R.id.Multi_phoneCall).setOnClickListener(this);
+            }else
+            {
+                setContentView(R.layout.activity_main_new);
+                findViewById(R.id.password_OK).setOnClickListener(this);
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+
+        }
         //findViewById(R.id.Multi_phoneCall).setOnClickListener(this);
 
 
@@ -103,11 +145,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-
-
-
-
-
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.phoneCall) {
@@ -115,7 +152,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
+        if(v.getId() == R.id.password_OK)
+        {
+            String password = ((TextView)findViewById(R.id.new_input_password)).getText().toString();
+            FileOutputStream keyFile = null;
+            try{
+                keyFile = openFileOutput("key.ini",MODE_PRIVATE);
+                keyFile.write(password.getBytes());
+                keyFile.close();
 
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+            setContentView(R.layout.activity_main);
+            findViewById(R.id.phoneCall).setOnClickListener(this);
+            findViewById(R.id.Multi_phoneCall).setOnClickListener(this);
+        }
+        if(v.getId() == R.id.Multi_phoneCall)
+        {
+            File file = null;
+            try{
+                file = new File(getFilesDir(),"key.ini");
+                file.delete();
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+            this.finish();
+        }
 
     }
 

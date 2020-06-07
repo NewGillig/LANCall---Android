@@ -14,14 +14,21 @@ public class AudioPlayerRunnable implements Runnable{
         this.audioPlayer.addData(data);
     }
     public void shutdown(){
-        audioPlayer.shutdown();
         stop=true;
+        try{
+            Thread.sleep(200);
+        }catch(Exception e){}
+        audioPlayer.shutdown();
+
     }
     @Override
     public void run() {
         while(!stop)
         {
             this.audioPlayer.playTone();
+/*            try {
+                Thread.sleep(1);
+            }catch(Exception e){}*/
         }
     }
 }

@@ -17,6 +17,7 @@ import com.LANCall.Audio.AudioPlayerFactory;
 import com.LANCall.Audio.AudioPlayerRunnable;
 import com.LANCall.Audio.AudioRecorderFactory;
 import com.LANCall.Audio.AudioRecorderRunnable;
+import com.LANCall.Cipher.AESCipher;
 import com.LANCall.Network.ClientFactory;
 import com.LANCall.Network.ClientRunnable;
 import com.LANCall.Network.NetUtil;
@@ -78,6 +79,10 @@ public class VoipP2PActivity extends AppCompatActivity implements View.OnClickLi
     String localIP = null;
     String remoteIP = null;
 
+    String keyHex = null;
+
+    AESCipher aesCipher = null;
+
 
     int page = 0;
 
@@ -112,6 +117,19 @@ public class VoipP2PActivity extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        File keyFile = null;
+        keyFile = new File(getFilesDir(),"key.ini");
+        FileInputStream keyFileInput;
+        try{
+            keyFileInput = new FileInputStream(keyFile);
+            byte[] keyHexByte = new byte[64];
+            keyFileInput.read(keyHexByte,0,64);
+            keyHex = new String(keyHexByte,"UTF-8");
+            aesCipher = new AESCipher(keyHex);
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
         setContentView(R.layout.activity_voip_p2p_init);
         page = 1;
         findViewById(R.id.user_input_phoneCall).setOnClickListener(this);
@@ -127,6 +145,7 @@ public class VoipP2PActivity extends AppCompatActivity implements View.OnClickLi
 
         record = new Thread(r);
         play = new Thread(p);
+
 
         clientFactory = new ClientFactory();
         serverFactory = new ServerFactory();
@@ -264,10 +283,26 @@ public class VoipP2PActivity extends AppCompatActivity implements View.OnClickLi
                 {
                     byte[] out = r.fetchTone();
                     if(out!=null) {
-                        if(isClient)
-                            voiceClient.writeBytes(out);
-                        else
-                            voiceServer.writeBytes(out);
+                        if(isClient) {
+                            byte[] cipherText = aesCipher.encrypt(out);
+                            byte[] cipherTextx = new byte[cipherText.length+18];
+                            String head = "123456789";
+                            String end = "987654321";
+                            System.arraycopy(head.getBytes(),0,cipherTextx,0,9);
+                            System.arraycopy(cipherText,0,cipherTextx,9,cipherText.length);
+                            System.arraycopy(end.getBytes(),0,cipherTextx,cipherText.length+9,9);
+                            voiceClient.writeBytes(cipherTextx);
+                        }
+                        else {
+                            byte cipherText[] = aesCipher.encrypt(out);
+                            byte[] cipherTextx = new byte[cipherText.length+18];
+                            String head = "123456789";
+                            String end = "987654321";
+                            System.arraycopy(head.getBytes(),0,cipherTextx,0,9);
+                            System.arraycopy(cipherText,0,cipherTextx,9,cipherText.length);
+                            System.arraycopy(end.getBytes(),0,cipherTextx,cipherText.length+9,9);
+                            voiceServer.writeBytes(cipherTextx);
+                        }
                     }
                 }
             }
@@ -276,25 +311,68 @@ public class VoipP2PActivity extends AppCompatActivity implements View.OnClickLi
         new Thread(new Runnable() {
             @Override
             public void run() {
+                byte[] cipherDataBuf = new byte[200000];
+                int place=0;
                 while(talking)
                 {
                     try {
                         Thread.sleep(1);
                     }catch(Exception e){}
-                    byte[] data;
-                    if(isClient)
-                        data = voiceClient.readBytes();
-                    else
-                        data = voiceServer.getBytes();
+                    byte[] data = null;
+
+                    if(isClient) {
+                        byte[] cipherData = voiceClient.readBytes();
+                        if(cipherData!=null) {
+                            System.arraycopy(cipherData, 0, cipherDataBuf, place, cipherData.length);
+                            place += cipherData.length;
+                        }
+                        //data = aesCipher.decrypt(cipherData);
+                    }
+                    else {
+                        byte[] cipherData = voiceServer.getBytes();
+                        if(cipherData!=null) {
+                            System.arraycopy(cipherData, 0, cipherDataBuf, place, cipherData.length);
+                            place += cipherData.length;
+                        }
+                        //data = aesCipher.decrypt(cipherData);
+                    }
+                    int start=-1;
+                    for(int i=0;i<place-9;i++)
+                    {
+                        if(cipherDataBuf[i]=='1'&&cipherDataBuf[i+1]=='2'&&cipherDataBuf[i+2]=='3'&&cipherDataBuf[i+3]=='4'&&cipherDataBuf[i+4]=='5'&&cipherDataBuf[i+5]=='6'&&cipherDataBuf[i+6]=='7'&&cipherDataBuf[i+7]=='8'&&cipherDataBuf[i+8]=='9')
+                        {
+                            start=i+9;
+                        }
+                        if(start!=-1&&cipherDataBuf[i]=='9'&&cipherDataBuf[i+1]=='8'&&cipherDataBuf[i+2]=='7'&&cipherDataBuf[i+3]=='6'&&cipherDataBuf[i+4]=='5'&&cipherDataBuf[i+5]=='4'&&cipherDataBuf[i+6]=='3'&&cipherDataBuf[i+7]=='2'&&cipherDataBuf[i+8]=='1'){
+                            data = aesCipher.decrypt(Arrays.copyOfRange(cipherDataBuf,start,i));
+/*                            if(data[10]!=127&&data[10]!=-128)
+                            {
+                                Log.e("eee","noise");
+                            }*/
+                            System.arraycopy(cipherDataBuf,i+9,cipherDataBuf,0,place-i-9);
+                            //cipherDataBuf = Arrays.copyOfRange(cipherDataBuf,i+3,place);
+                            place-=i+9;
+                            break;
+                        }
+                    }
+                    if(place>180000)
+                    {
+                        place = 0;
+                    }
+
 
                     if(data!=null) {
+                        Log.e("eee","writeData"+data.length);
                         p.addData(data);
+
                         //Log.e("eee","playBytes: "+data.length);
                     }
                 }
             }
         }).start();
+
         play.start();
+
     }
 
     public void restartP2P()

@@ -68,7 +68,7 @@ public class Server {
 
     public byte[] getBytes(){
 
-        byte[] data = new byte[640*32];
+        byte[] data = new byte[640*640];
         byte[] datax = null;
         try {
             int len = inputStream.read(data);

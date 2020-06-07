@@ -15,9 +15,11 @@ public class AudioRecorder {
     private final static int AUDIO_CHANNEL = AudioFormat.CHANNEL_IN_MONO;
     private final static int AUDIO_ENCODING = AudioFormat.ENCODING_PCM_8BIT;
     private int bufferSize = 0;
+    private int count = 0;
     private AudioRecord audioRecord = null;
 
     private byte[] audioData = null;
+    byte[] audiox = new byte[2000];
 
     private ArrayList<byte[]> dataList = null;
 
@@ -34,8 +36,8 @@ public class AudioRecorder {
     public void createAudio()
     {
         bufferSize = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE,AUDIO_CHANNEL,AUDIO_ENCODING);
-        audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,AUDIO_SAMPLE_RATE,AUDIO_CHANNEL,AUDIO_ENCODING,32);
-        audioData = new byte[32];
+        audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,AUDIO_SAMPLE_RATE,AUDIO_CHANNEL,AUDIO_ENCODING,4000);
+        audioData = new byte[2000];
         dataList = new ArrayList<byte[]>();
         audioRecord.startRecording();
     }
@@ -46,16 +48,27 @@ public class AudioRecorder {
         }catch(Exception e){}*/
 
         //Log.e("eee","list size"+dataList.size());
-        int read = audioRecord.read(audioData, 0, 16);
-        Log.e("eee","record bytes"+read);
-        byte[] audiox = null;
+        int read = audioRecord.read(audioData, 0, 2000);
         if(read>0) {
             audiox = Arrays.copyOfRange(audioData, 0, read);
             dataList.add(audiox);
         }
-        if(dataList.size()>8)
+        //Log.e("eee","record bytes"+read);
+
+/*        if(read>0) {
+            System.arraycopy(audioData,0,audiox,count,read);
+            count+=read;
+            //audiox = Arrays.copyOfRange(audioData, 0, read);
+        }
+        if(count>=1900)
         {
-            while(dataList.size()>2)
+            byte[] audioxx = Arrays.copyOfRange(audiox,0,count);
+            dataList.add(audioxx);
+            count=0;
+        }*/
+        if(dataList.size()>4)
+        {
+            while(dataList.size()>1)
             {
                 dataList.remove(0);
             }
@@ -68,7 +81,7 @@ public class AudioRecorder {
         return dataList;
     }
     public byte[] fetchAudioData(){
-        if(dataList.size()>2) {
+        if(dataList.size()>1) {
             return dataList.remove(0);
         }
         else {

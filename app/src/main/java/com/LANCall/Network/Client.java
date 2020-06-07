@@ -55,7 +55,7 @@ public class Client {
 
     public byte[] readBytes()
     {
-        byte[] data = new byte[640*32];
+        byte[] data = new byte[640*640];
         try {
             int len = inputStream.read(data);
             //Log.e("eee","getBytes: "+len);
